@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"math"
 	"runtime"
 	"sync"
 	"time"
@@ -13,28 +12,33 @@ func main() {
 	for i := 1; i <= runtime.NumCPU(); i++ {
 		var duration int64 = 0
 		slice := createSlice(6)
-
+		//fmt.Println(slice)
 		aux := make([]int32, len(slice))
 		copy(aux, slice)
 		for j := 0; j < 100; j++ {
-			start := time.Now()
+
+			semaphore := make(chan struct{}, i)
+
 			var wg sync.WaitGroup
-			wg.Add(1)
-			aux := make([]int32, len(slice))
-			copy(aux, slice)
-			go parallelDivide(0, len(slice)-1, slice, &wg, i, aux)
-			wg.Wait()
+			wg.Add(1) // Top-level wait group for the whole divide-and-conquer process
+
+			start := time.Now()
+			go parallelDivide(0, len(slice)-1, slice, aux, semaphore, &wg)
+			wg.Wait() // Wait for the entire sorting process to complete
+
 			duration += time.Since(start).Milliseconds()
 			correct := correctness(slice)
 			if !correct {
 				fmt.Println("!!!")
 			}
+			//fmt.Print(slice)
 			scramble(slice)
 			copy(aux, slice)
 		}
 		fmt.Println("With ", i, " Core(s): \n", duration, " ms total\n", duration/100, " ms average \n")
 	}
 
+	/**
 	for i := 3; i < 10; i++ {
 		slice := createSlice(i)
 
@@ -58,4 +62,5 @@ func main() {
 
 		fmt.Println()
 	}
+	*/
 }
