@@ -36,11 +36,6 @@ func parallelDivide(left int, right int, slice []int32, aux []int32, semaphore c
 	// Wait for both subarrays to finish sorting
 	subWg.Wait()
 
-	if right-left < 1000 {
-		conquer(left, middle, right, slice, aux)
-		return
-	}
-
 	var mergeGroup sync.WaitGroup
 	mergeGroup.Add(1)
 	// Merge the sorted subarrays
