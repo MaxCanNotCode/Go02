@@ -15,12 +15,12 @@ func main() {
 		aux := make([]int32, len(slice))
 		copy(aux, slice)
 
-		for j := 0; j < 100; j++ {
+		for j := 0; j < 1; j++ {
 			var wg sync.WaitGroup
 			wg.Add(1)
 			p := i
 			start := time.Now()
-			go parallelQuickSort(slice, 0, len(slice), p, &wg)
+			go parallelQuickSort(slice, 0, len(slice), p, &wg, aux)
 			wg.Wait()
 			duration += time.Since(start).Milliseconds()
 			correct := correctness(slice)
