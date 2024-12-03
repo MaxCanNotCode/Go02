@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"math"
 	"runtime"
 	"sync"
 	"time"
@@ -17,11 +16,11 @@ func main() {
 		copy(aux, slice)
 
 		for j := 0; j < 100; j++ {
-			semaphore := make(chan struct{}, i)
 			var wg sync.WaitGroup
 			wg.Add(1)
+			p := i
 			start := time.Now()
-			go parallelQuickSort(slice, 0, len(slice), semaphore, &wg)
+			go parallelQuickSort(slice, 0, len(slice), p, &wg)
 			wg.Wait()
 			duration += time.Since(start).Milliseconds()
 			correct := correctness(slice)
@@ -34,6 +33,7 @@ func main() {
 		}
 		fmt.Println("PARALLEL QUICKSORT With ", i, " Core(s): \n", duration, " ms total\n", duration/100, " ms average \n")
 
+		/**
 		for j := 0; j < 100; j++ {
 			duration = callParMS(i, slice, aux, duration)
 			scramble(slice)
@@ -41,9 +41,11 @@ func main() {
 		}
 		fmt.Println("PARALLEL MERGESORT With ", i, " Core(s): \n", duration, " ms total\n", duration/100, " ms average \n")
 		duration = 0
-	}
+		*/
 
-	for i := 3; i < 10; i++ {
+	}
+	/**
+		for i := 3; i < 10; i++ {
 		slice := createSlice(i)
 
 		start := time.Now()
@@ -66,8 +68,11 @@ func main() {
 
 		fmt.Println()
 	}
+	*/
+
 }
 
+/**
 func callParMS(i int, slice []int32, aux []int32, duration int64) int64 {
 	semaphore := make(chan struct{}, i)
 	var wg sync.WaitGroup
@@ -82,3 +87,4 @@ func callParMS(i int, slice []int32, aux []int32, duration int64) int64 {
 	}
 	return duration
 }
+*/

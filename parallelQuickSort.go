@@ -1,29 +1,35 @@
 package main
 
-import "sync"
+import (
+	"sync"
+)
 
-func parallelQuickSort(slice []int32, start int, end int, semaphore chan struct{}, wg *sync.WaitGroup) {
-	defer wg.Done()
-	if start == end {
+func parallelQuickSort(slice []int32, start int, end int, p int, wg *sync.WaitGroup) {
+	if start >= end {
+		if wg != nil {
+			wg.Done()
+		}
 		return
 	}
 
 	i := rearrange(start, end, slice)
 
-	var subWg sync.WaitGroup
-	subWg.Add(2)
-
-	select {
-	case semaphore <- struct{}{}:
+	// We can only create a new goroutine if the number of active goroutines is below the limit
+	if p > 1 {
+		var localWg sync.WaitGroup
+		localWg.Add(1)
 		go func() {
-			parallelQuickSort(slice, start, i+1, semaphore, &subWg)
-			<-semaphore
+			parallelQuickSort(slice, start, i+1, p/2, &localWg)
 		}()
-	default:
-		parallelQuickSort(slice, start, i+1, semaphore, &subWg)
+		parallelQuickSort(slice, i+2, end, p/2, nil)
+		localWg.Wait()
+	} else {
+		parallelQuickSort(slice, start, i+1, 0, nil)
+		parallelQuickSort(slice, i+2, end, 0, nil)
 	}
 
-	parallelQuickSort(slice, i+2, end, semaphore, &subWg)
-
-	subWg.Wait()
+	// Ensure the global WaitGroup is decremented if needed
+	if wg != nil {
+		wg.Done()
+	}
 }
